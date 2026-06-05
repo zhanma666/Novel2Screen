@@ -7,54 +7,54 @@
       key: "workspace",
       label: "项目工作台",
       eyebrow: "Operating Deck",
-      description: "围绕需求文档中的 MVP 闭环，汇总项目、任务、活动与实现范围。",
+      description: "围绕根目录 README 中的 9 项核心功能，汇总项目、任务、活动与能力覆盖。",
     },
     {
       key: "upload",
-      label: "小说上传",
+      label: "小说上传与解析",
       eyebrow: "Source Intake",
       description: "处理 TXT / DOCX 输入，展示章节解析结果，并标记下游模块刷新状态。",
     },
     {
       key: "graph",
-      label: "图谱构建",
+      label: "人物与故事图谱",
       eyebrow: "Knowledge Graph",
-      description: "展示人物、关系、事件与时间线，并为剧本生成提供结构化上下文。",
+      description: "同时承载人物关系图谱与故事图谱，为剧本生成提供结构化上下文。",
     },
     {
       key: "script",
-      label: "剧本编辑",
+      label: "剧本改编与协同创作",
       eyebrow: "Script Editor",
-      description: "在风格化生成结果上继续编辑场次与片段，并标记审校、评分和分镜过期。",
+      description: "支持多风格剧本改编，并通过在线编辑完成前端的人机协同创作流程。",
     },
     {
       key: "review",
-      label: "审校评分",
+      label: "AI审校与质量评估",
       eyebrow: "Review & Score",
-      description: "输出 AI 审校问题与多维质量评分，让修改路径更可解释。",
+      description: "覆盖 AI 剧本审校与剧本质量评估，让修改路径更可解释。",
     },
     {
       key: "storyboard",
-      label: "分镜脚本",
+      label: "分镜脚本生成",
       eyebrow: "Storyboard",
       description: "根据场次内容生成镜头设计、景别、运镜、光线和时长建议。",
     },
     {
       key: "export",
-      label: "YAML 导出",
+      label: "YAML剧本导出",
       eyebrow: "Schema Export",
-      description: "按 Schema 1.0 聚合项目内容，预览校验结果并下载导出文件。",
+      description: "按统一 Schema 导出 YAML 格式剧本文件，并在导出前执行结构校验。",
     },
   ];
 
   const taskDefinitions = {
-    source_parse: { label: "解析原文", short: "原文", group: "source" },
-    graph_extract: { label: "构建图谱", short: "图谱", group: "graph" },
-    script_generation: { label: "生成剧本", short: "剧本", group: "script" },
-    script_review: { label: "AI 审校", short: "审校", group: "review" },
-    quality_scoring: { label: "质量评分", short: "评分", group: "quality" },
-    storyboard_generation: { label: "生成分镜", short: "分镜", group: "storyboard" },
-    yaml_export: { label: "导出 YAML", short: "导出", group: "export" },
+    source_parse: { label: "小说上传与解析", short: "上传", group: "source" },
+    graph_extract: { label: "人物/故事图谱", short: "图谱", group: "graph" },
+    script_generation: { label: "多风格剧本改编", short: "改编", group: "script" },
+    script_review: { label: "AI剧本审校", short: "审校", group: "review" },
+    quality_scoring: { label: "剧本质量评估", short: "评分", group: "quality" },
+    storyboard_generation: { label: "分镜脚本生成", short: "分镜", group: "storyboard" },
+    yaml_export: { label: "YAML剧本导出", short: "导出", group: "export" },
   };
 
   const shotSizeLabels = {
@@ -509,14 +509,14 @@
       renderMetricCard("已导出", progress.completed + " / " + progress.total, "工作流闭环覆盖") +
       "</section>" +
       '<section class="panel workspace-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">MVP 闭环</p><h3>阶段工作流</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">核心功能</p><h3>阶段工作流</h3></div>' +
       '<button class="ghost-button" data-nav="upload" type="button">进入上传</button></div>' +
       '<div class="workflow-track">' +
-      renderWorkflowStep("1", "上传与解析", getTask("source_parse"), "TXT / DOCX -> 章节") +
-      renderWorkflowStep("2", "图谱抽取", getTask("graph_extract"), "人物 / 关系 / 事件") +
-      renderWorkflowStep("3", "生成剧本", getTask("script_generation"), "风格化脚本初稿") +
-      renderWorkflowStep("4", "审校评分", getTask("script_review"), "问题定位与质量解释") +
-      renderWorkflowStep("5", "分镜导出", getTask("storyboard_generation"), "镜头设计 + YAML") +
+      renderWorkflowStep("1", "小说上传与解析", getTask("source_parse"), "TXT / DOCX -> 章节拆分") +
+      renderWorkflowStep("2", "人物关系与故事图谱", getTask("graph_extract"), "人物 / 关系 / 事件 / 时间线") +
+      renderWorkflowStep("3", "多风格剧本改编", getTask("script_generation"), "电影 / 电视剧 / 短剧 / 动漫") +
+      renderWorkflowStep("4", "AI 审校与质量评估", getTask("script_review"), "问题定位 + 评分解释") +
+      renderWorkflowStep("5", "分镜与 YAML 导出", getTask("storyboard_generation"), "镜头设计 + 结构化导出") +
       "</div>" +
       "</section>" +
       '<section class="panel task-panel">' +
@@ -556,9 +556,9 @@
       '<div class="panel-head"><div><p class="panel-kicker">Frontend Frame</p><h3>当前前端框架</h3></div>' +
       '<button class="ghost-button" data-nav="script" type="button">编辑剧本</button></div>' +
       '<ul class="feature-list">' +
-      "<li>零依赖静态单页应用，直接打开 <code>index.html</code> 可运行。</li>" +
-      "<li>按文档对象组织数据：<code>project/source/characters/story_graph/script</code>。</li>" +
-      "<li>前端内建任务状态、风格生成、审校评分、分镜和 YAML 预览联动。</li>" +
+      "<li>已覆盖 README 中的 9 项核心能力展示路径，而不只是单纯页面占位。</li>" +
+      "<li>当前支持小说上传解析、人物关系图谱、故事图谱、剧本改编、审校评分、分镜与导出联动。</li>" +
+      "<li>人机协同创作通过在线编辑场次、动作、对白及顺序调整进行前端模拟。</li>" +
       "<li>YAML 预览遵守 Schema 1.0，并带结构校验和 stale 警告。</li>" +
       "</ul>" +
       "</section>" +
@@ -637,7 +637,7 @@
     return (
       '<div class="upload-grid">' +
       '<section class="panel upload-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Upload View</p><h3>导入源文件</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">Upload View</p><h3>小说上传与解析</h3></div>' +
       '<button class="primary-button" data-action="choose-file" type="button">选择 TXT / DOCX</button></div>' +
       '<div class="upload-zone" id="uploadZone">' +
       '<input class="visually-hidden" id="fileInput" type="file" accept=".txt,.docx" />' +
@@ -737,7 +737,7 @@
     return (
       '<div class="graph-layout">' +
       '<section class="panel graph-stage-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Graph View</p><h3>人物关系图谱</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">Graph View</p><h3>人物关系图谱与故事图谱</h3></div>' +
       '<div class="toolbar-inline">' +
       '<button class="secondary-button" data-action="run-extraction" type="button">重新抽取</button>' +
       '<button class="ghost-button" data-nav="script" type="button">去生成剧本</button>' +
@@ -798,7 +798,7 @@
       "</section>" +
       '<section class="graph-side-column">' +
       '<article class="panel character-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Character Detail</p><h3>' +
+      '<div class="panel-head"><div><p class="panel-kicker">人物关系图谱</p><h3>' +
       escapeHtml(selectedCharacter.name) +
       "</h3></div>" +
       '<span class="status-pill info">' +
@@ -838,7 +838,7 @@
         .join("") +
       "</div></article>" +
       '<article class="panel timeline-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Story Timeline</p><h3>事件时间线</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">故事图谱</p><h3>事件时间线</h3></div>' +
       '<span class="status-pill ' +
       (state.data.meta.graph_stale ? "warning" : "success") +
       '">' +
@@ -879,7 +879,7 @@
     return (
       '<div class="script-layout">' +
       '<section class="panel script-toolbar-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Script Generation Service</p><h3>风格化生成与编辑</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">多风格剧本改编</p><h3>剧本改编与人机协同创作</h3></div>' +
       '<div class="toolbar-inline">' +
       '<button class="secondary-button" data-action="generate-script" type="button">基于图谱生成</button>' +
       '<button class="ghost-button" data-nav="review" type="button">查看审校</button>' +
@@ -1064,7 +1064,7 @@
       '<button class="primary-button" data-action="run-quality" type="button">刷新评分</button>' +
       "</div></article>" +
       '<section class="panel dimensions-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Quality Dimensions</p><h3>维度评分</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">剧本质量评估</p><h3>维度评分</h3></div>' +
       '<span class="status-pill ' +
       (state.data.meta.quality_stale ? "warning" : "success") +
       '">' +
@@ -1091,7 +1091,7 @@
         .join("") +
       "</div></section></section>" +
       '<section class="panel review-issues-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Review Service</p><h3>审校问题</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">AI 剧本审校</p><h3>审校问题</h3></div>' +
       '<span class="status-pill ' +
       (state.data.meta.review_stale ? "warning" : "success") +
       '">' +
@@ -1140,7 +1140,7 @@
     return (
       '<div class="storyboard-layout">' +
       '<section class="panel storyboard-top-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Storyboard Service</p><h3>镜头设计</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">分镜脚本生成</p><h3>镜头设计</h3></div>' +
       '<button class="primary-button" data-action="generate-storyboard" type="button">重新生成分镜</button></div>' +
       '<div class="storyboard-overview">' +
       renderMetricCard("镜头总数", state.data.storyboard.shots.length, "覆盖全部场次") +
@@ -1210,7 +1210,7 @@
       '<div class="export-layout">' +
       '<section class="export-sidebar-column">' +
       '<article class="panel export-summary-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Schema Validator</p><h3>导出检查</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">导出 YAML 格式剧本</p><h3>导出检查</h3></div>' +
       '<span class="status-pill ' +
       (exportSnapshot.validation.valid ? "success" : "danger") +
       '">' +
@@ -1227,7 +1227,7 @@
       '<button class="primary-button" data-action="download-yaml" type="button">下载 YAML</button>' +
       "</div></article>" +
       '<article class="panel export-checklist-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Top-level Fields</p><h3>结构清单</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">Schema Fields</p><h3>结构清单</h3></div>' +
       '<button class="ghost-button" data-nav="workspace" type="button">回到工作台</button></div>' +
       '<ul class="check-list">' +
       Object.keys(exportSnapshot.model)
@@ -1259,7 +1259,7 @@
         .join("") +
       "</div></article></section>" +
       '<section class="panel yaml-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">YAML Preview</p><h3>结构化导出预览</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">YAML Preview</p><h3>YAML 结构预览</h3></div>' +
       '<span class="status-pill info">schema_version 1.0</span></div>' +
       '<pre class="yaml-preview"><code>' +
       escapeHtml(exportSnapshot.yamlText) +
