@@ -1333,6 +1333,8 @@
     );
   }
 
+  function bindSectionEvents() {}
+
   function renderSectionBody() {
     const container = getCachedElement('sectionBody');
     if (!container) return;
