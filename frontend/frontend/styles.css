@@ -28,7 +28,6 @@
   --font-title: "Source Han Serif SC", "Noto Serif SC", "STSong", serif;
   --font-body: "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --font-mono: "Cascadia Code", "Consolas", monospace;
-  /* 新增：过渡动画 */
   --transition-fast: 160ms ease;
   --transition-normal: 380ms ease;
   --transition-slow: 420ms ease;
@@ -1302,4 +1301,282 @@ code {
   .panel-head h3 {
     font-size: 24px;
   }
+}
+
+/* 简约大气欢迎页样式 */
+.welcome-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #f9f6ef 0%, #f3efe6 100%);
+}
+
+/* 顶部导航 */
+.welcome-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 60px;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.welcome-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.welcome-header-title h2 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.welcome-header-title p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.welcome-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.welcome-header-btn.ghost {
+  border-color: rgba(26, 26, 26, 0.15);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.welcome-header-btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(26, 26, 26, 0.25);
+}
+
+.welcome-header-btn.outline {
+  border: 1px solid rgba(26, 26, 26, 0.2);
+  background: transparent;
+  padding: 10px;
+}
+
+.welcome-header-btn.outline:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 主内容区 */
+.welcome-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.welcome-tagline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 28px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 100px;
+  border: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.welcome-title {
+  margin: 0 0 20px;
+  font-family: var(--font-title);
+  font-size: 64px;
+  line-height: 1.1;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+.welcome-title-accent {
+  background: linear-gradient(135deg, #c99659 0%, #b88247 50%, #a67035 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+.welcome-description {
+  margin: 0 0 40px;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #555;
+  max-width: 680px;
+}
+
+.highlight-yaml {
+  color: #c99659;
+  font-weight: 500;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.welcome-btn.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 52px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 180ms ease;
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.2);
+}
+
+.welcome-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(26, 26, 26, 0.25);
+}
+
+.welcome-btn.primary:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 760px) {
+  .welcome-header {
+    padding: 16px 20px;
+  }
+
+  .welcome-header-title h2 {
+    font-size: 18px;
+  }
+
+  .welcome-header-title p {
+    display: none;
+  }
+
+  .welcome-header-btn.ghost {
+    padding: 10px 14px;
+  }
+
+  .welcome-header-btn.ghost svg + span {
+    display: none;
+  }
+
+  .welcome-main {
+    padding: 50px 20px;
+  }
+
+  .welcome-title {
+    font-size: 40px;
+  }
+
+  .welcome-description {
+    font-size: 16px;
+  }
+
+  .welcome-btn.primary {
+    padding: 16px 40px;
+    font-size: 16px;
+  }
+}
+
+/* 文本输入区域样式 */
+.text-input-section {
+  width: 100%;
+  margin-bottom: var(--gap-lg);
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-md);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.input-group label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text-subtle);
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+  padding: 12px 16px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  background-color: var(--color-surface);
+  color: var(--color-text-default);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.input-group textarea {
+  resize: vertical;
+  min-height: 200px;
+  line-height: 1.6;
+}
+
+.panel-actions {
+  display: flex;
+  gap: var(--gap-sm);
+}
+
+.input-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--gap-sm);
+}
+
+.word-count {
+  font-size: 0.9rem;
+  color: var(--color-text-subtle);
+  font-weight: 500;
 }

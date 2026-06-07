@@ -211,7 +211,7 @@
     };
   }
 
-  window.Novel2ScreenYaml = {
+  window.ScenecraftYaml = {
     buildExportModel: buildExportModel,
     validateProjectModel: validateProjectModel,
     stringifyYaml: stringifyYaml,

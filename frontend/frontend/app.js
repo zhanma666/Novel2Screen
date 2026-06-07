@@ -1,6 +1,166 @@
 (function () {
-  const dataApi = window.Novel2ScreenData;
-  const yamlApi = window.Novel2ScreenYaml;
+  console.log("app.js starting...");
+
+  // 安全获取 dataApi 和 yamlApi，确保可用
+  let dataApi = window.ScenecraftData;
+  let yamlApi = window.ScenecraftYaml;
+
+  console.log("dataApi:", dataApi);
+  console.log("yamlApi:", yamlApi);
+
+  // 如果 yamlApi 还没有加载，提供临时对象
+  if (!yamlApi) {
+    console.warn("yamlApi not found!");
+    yamlApi = {
+      buildExportModel: function(project) {
+        return project;
+      },
+      validateProjectModel: function(model) {
+        return {
+          valid: true,
+          errors: []
+        };
+      },
+      stringifyYaml: function(obj, indent) {
+        return "# YAML export is not available in offline mode";
+      }
+    };
+  }
+
+  // 如果 dataApi 还没有加载，尝试等待或提供默认值
+  if (!dataApi) {
+    console.warn("dataApi not found!");
+    // 创建一个完整的 dataApi 临时对象
+    dataApi = {
+      styleLibrary: {
+        film: {
+          label: "电影",
+          description: "压缩事件数量，强化氛围和镜头感。",
+          actionTone: "镜头缓慢推进，环境先于人物进入叙事。",
+          dialogueTone: "对白克制，强调潜台词。",
+          emotion: "低声",
+          pacing: "集中",
+          shotSizes: ["wide", "medium", "close_up"],
+          cameraMoves: ["slow_push_in", "tracking", "static"],
+          lighting: "冷色雨夜光与局部暖光形成对照。",
+          audio: "雨声、脚步声、低频环境音",
+        },
+        tv_series: {
+          label: "电视剧",
+          description: "保留更多铺垫与人物互动，适合分集推进。",
+          actionTone: "镜头服务对白与角色关系，保留更多交互信息。",
+          dialogueTone: "对白更完整，交代动机与关系。",
+          emotion: "沉稳",
+          pacing: "层层递进",
+          shotSizes: ["medium", "close_up", "wide"],
+          cameraMoves: ["pan", "static", "dolly"],
+          lighting: "自然光与实景光源并重。",
+          audio: "对白主导，环境音作为铺底",
+        },
+        short_drama: {
+          label: "短剧",
+          description: "强调冲突和反转，单场信息密度更高。",
+          actionTone: "切入更直接，场次落点更明确。",
+          dialogueTone: "对白短促有钩子，适合推进冲突。",
+          emotion: "急促",
+          pacing: "高压推进",
+          shotSizes: ["close_up", "medium", "wide"],
+          cameraMoves: ["handheld", "slow_push_in", "pan"],
+          lighting: "对比更强，重点压住人物表情。",
+          audio: "节奏性音乐与近距离收音",
+        },
+        animation: {
+          label: "动漫",
+          description: "强化视觉奇观和动作节奏，允许更夸张的表演。",
+          actionTone: "动作描述更视觉化，强调构图和节奏。",
+          dialogueTone: "对白更具角色感，可容纳夸张反应。",
+          emotion: "锐利",
+          pacing: "张弛分明",
+          shotSizes: ["extreme_wide", "medium", "close_up"],
+          cameraMoves: ["tracking", "tilt", "slow_push_in"],
+          lighting: "允许更风格化的色彩分区和轮廓光。",
+          audio: "环境音、拟音和节奏点配合动作",
+        },
+      },
+      deepClone: function(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      },
+      nowIso: function() {
+        return new Date().toISOString();
+      },
+      createEmptyProject: function() {
+        return {
+          schema_version: "1.0",
+          project: {
+            id: "project_001",
+            title: "新项目",
+            description: "一个新的小说影视化改编项目。",
+            creator: "user",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            status: "editing",
+          },
+          source: { document: null, parse_result: null, chapters: [] },
+          characters: [],
+          relationships: [],
+          story_graph: { events: [], locations: [], timeline: [] },
+          script: { id: "script_001", title: "新项目", style: "film", version: "v1", logline: "", source_event_ids: [], scenes: [] },
+          storyboard: { shots: [] },
+          review: { reviewed_at: null, model: null, issues: [] },
+          quality: { total_score: 0, dimensions: [] },
+          export: { exported_at: null, exporter_version: null, validated: false, validation_errors: [] },
+          extensions: {},
+          meta: { graph_stale: false, review_stale: false, quality_stale: false, storyboard_stale: false, export_stale: false, graph_mode: "edit", layout: {} },
+          tasks: [],
+          activity_log: [],
+        };
+      },
+      createDemoProject: function() {
+        return this.createEmptyProject();
+      },
+      nextVersion: function(version) {
+        const match = version.match(/v(\d+)/);
+        const num = match ? parseInt(match[1], 10) : 1;
+        return "v" + (num + 1);
+      },
+      buildExtractionFromSource: function(project) {
+        return {
+          characters: [],
+          relationships: [],
+          story_graph: { events: [], locations: [], timeline: [] }
+        };
+      },
+      buildScriptFromStoryGraph: function(project, style) {
+        return {
+          id: "script_001",
+          title: project.project.title || "新项目",
+          style: style || "film",
+          version: this.nextVersion(project.script.version),
+          logline: "",
+          source_event_ids: [],
+          scenes: []
+        };
+      },
+      buildReviewFromScript: function(project) {
+        return {
+          reviewed_at: new Date().toISOString(),
+          model: "local",
+          issues: []
+        };
+      },
+      buildQualityFromReview: function(project) {
+        return {
+          total_score: 0,
+          dimensions: []
+        };
+      },
+      buildStoryboardFromScript: function(project) {
+        return {
+          shots: []
+        };
+      }
+    };
+  }
 
   // 缓存 DOM 查询结果，避免重复查询
   const domCache = {
@@ -108,7 +268,8 @@
   const initialSection = window.location.hash.replace(/^#/, "");
 
   const state = {
-    data: dataApi.createDemoProject(),
+    hasEntered: false,
+    data: dataApi.createEmptyProject(),
     ui: {
       activeSection: validSectionKeys.has(initialSection) ? initialSection : "workspace",
       selectedSceneId: "",
@@ -248,20 +409,40 @@
 
   function getTask(type) {
     if (!state.data.tasks) return null;
-    return state.data.tasks.find((task) => task.type === type);
+    const task = state.data.tasks.find((task) => task.type === type);
+    if (task) return task;
+    
+    // 如果没有找到任务，返回一个默认的空任务
+    return {
+      type: type,
+      status: "pending",
+      progress: 0,
+      message: "等待开始创作，先上传或输入小说内容。",
+      updated_at: state.data.project.created_at
+    };
   }
 
   function updateTask(type, status, progress, message) {
-    const task = getTask(type);
+    let task = state.data.tasks.find((t) => t.type === type);
+    
     if (!task) {
-      console.warn('Task not found:', type);
-      return;
+      // 如果任务不存在，创建一个新任务
+      task = {
+        id: "task_" + Date.now(),
+        type: type,
+        status: status,
+        progress: safeNumber(progress, 0),
+        message: message,
+        updated_at: dataApi.nowIso()
+      };
+      state.data.tasks.push(task);
+    } else {
+      // 如果任务存在，更新它
+      task.status = status;
+      task.progress = safeNumber(progress, 0);
+      task.message = message;
+      task.updated_at = dataApi.nowIso();
     }
-
-    task.status = status;
-    task.progress = safeNumber(progress, 0);
-    task.message = message;
-    task.updated_at = dataApi.nowIso();
   }
 
   function updateProjectTimestamp() {
@@ -291,6 +472,16 @@
   }
 
   function getCurrentTask() {
+    if (state.data.tasks.length === 0) {
+      return {
+        type: "source_parse",
+        status: "pending",
+        progress: 0,
+        message: "等待开始创作，先上传或输入小说内容。",
+        updated_at: state.data.project.created_at
+      };
+    }
+
     const runningTask = state.data.tasks.find((task) => task.status === "running");
     if (runningTask) {
       return runningTask;
@@ -322,12 +513,39 @@
 
   function getActiveScene() {
     ensureSelection();
-    return state.data.script.scenes.find((scene) => scene.id === state.ui.selectedSceneId);
+    const scene = state.data.script.scenes.find((scene) => scene.id === state.ui.selectedSceneId);
+    if (scene) return scene;
+    
+    // 如果没有找到场景，返回一个默认的空对象
+    return {
+      id: "",
+      index: 0,
+      title: "未选择场次",
+      location: "",
+      time: "",
+      synopsis: "",
+      characters: [],
+      beats: [],
+      source_event_ids: []
+    };
   }
 
   function getSelectedCharacter() {
     ensureSelection();
-    return state.data.characters.find((character) => character.id === state.ui.selectedCharacterId);
+    const character = state.data.characters.find((character) => character.id === state.ui.selectedCharacterId);
+    if (character) return character;
+    
+    // 如果没有找到人物，返回一个默认的空对象
+    return {
+      id: "",
+      name: "未选择人物",
+      identity: "",
+      description: "",
+      first_appearance: {
+        chapter_id: "",
+        excerpt: ""
+      }
+    };
   }
 
   function getEventById(eventId) {
@@ -366,7 +584,7 @@
       warnings.push("分镜脚本未同步最新剧本内容。");
     }
 
-    if (state.data.source.parse_result.parser_version === "browser-docx-placeholder") {
+    if (state.data.source.parse_result && state.data.source.parse_result.parser_version === "browser-docx-placeholder") {
       warnings.push("当前 DOCX 章节为前端占位解析结果，后续需接入后端 Parser Service。");
     }
 
@@ -564,6 +782,58 @@
     const progress = getProjectProgress();
     const currentTask = getCurrentTask();
 
+    const tasksContent = state.data.tasks.length === 0 
+      ? '<div class="empty-state" style="padding: var(--gap-lg); text-align: center; color: var(--color-text-subtle);">' +
+        '<p>暂无任务记录，先开始创作吧！</p>' +
+        '</div>'
+      : state.data.tasks
+        .map((task) => {
+          return (
+            '<article class="task-row">' +
+            '<div class="task-row-head"><strong>' +
+            escapeHtml(taskDefinitions[task.type].label) +
+            "</strong>" +
+            '<span class="status-pill ' +
+            statusTone(task.status) +
+            '">' +
+            statusLabel(task.status) +
+            "</span></div>" +
+            "<p>" +
+            escapeHtml(task.message) +
+            "</p>" +
+            '<div class="progress-bar compact"><span style="width:' +
+            Math.max(task.progress || 0, 4) +
+            '%;"></span></div>' +
+            '<small>最近更新：' +
+            formatDate(task.updated_at) +
+            "</small>" +
+            "</article>"
+          );
+        })
+        .join("");
+
+    const activityContent = state.data.activity_log.length === 0
+      ? '<div class="empty-state" style="padding: var(--gap-lg); text-align: center; color: var(--color-text-subtle);">' +
+        '<p>暂无操作记录</p>' +
+        '</div>'
+      : state.data.activity_log
+        .map((item) => {
+          return (
+            '<article class="activity-item">' +
+            '<span class="activity-time">' +
+            formatDate(item.time) +
+            "</span>" +
+            "<strong>" +
+            escapeHtml(item.title) +
+            "</strong>" +
+            "<p>" +
+            escapeHtml(item.detail) +
+            "</p>" +
+            "</article>"
+          );
+        })
+        .join("");
+
     return (
       '<div class="workspace-grid">' +
       '<section class="metrics-grid">' +
@@ -592,31 +862,7 @@
       '">' +
       statusLabel(currentTask.status) +
       "</span></div>" +
-      state.data.tasks
-        .map((task) => {
-          return (
-            '<article class="task-row">' +
-            '<div class="task-row-head"><strong>' +
-            escapeHtml(taskDefinitions[task.type].label) +
-            "</strong>" +
-            '<span class="status-pill ' +
-            statusTone(task.status) +
-            '">' +
-            statusLabel(task.status) +
-            "</span></div>" +
-            "<p>" +
-            escapeHtml(task.message) +
-            "</p>" +
-            '<div class="progress-bar compact"><span style="width:' +
-            Math.max(task.progress || 0, 4) +
-            '%;"></span></div>' +
-            '<small>最近更新：' +
-            formatDate(task.updated_at) +
-            "</small>" +
-            "</article>"
-          );
-        })
-        .join("") +
+      tasksContent +
       "</section>" +
       '<section class="panel feature-panel">' +
       '<div class="panel-head"><div><p class="panel-kicker">Frontend Frame</p><h3>当前前端框架</h3></div>' +
@@ -632,23 +878,7 @@
       '<div class="panel-head"><div><p class="panel-kicker">Activity Log</p><h3>最近操作</h3></div>' +
       '<button class="ghost-button" data-nav="export" type="button">查看导出</button></div>' +
       '<div class="activity-feed">' +
-      state.data.activity_log
-        .map((item) => {
-          return (
-            '<article class="activity-item">' +
-            '<span class="activity-time">' +
-            formatDate(item.time) +
-            "</span>" +
-            "<strong>" +
-            escapeHtml(item.title) +
-            "</strong>" +
-            "<p>" +
-            escapeHtml(item.detail) +
-            "</p>" +
-            "</article>"
-          );
-        })
-        .join("") +
+      activityContent +
       "</div></section>" +
       "</div>"
     );
@@ -699,94 +929,134 @@
   function renderUploadSection() {
     const documentMeta = state.data.source.document;
     const parseMeta = state.data.source.parse_result;
+    const hasChapters = state.data.source.chapters && state.data.source.chapters.length > 0;
+
+    // 解析概况内容
+    const metaContent = !parseMeta 
+      ? '<div class="empty-state" style="padding: var(--gap-lg); text-align: center; color: var(--color-text-subtle);">' +
+        '<p>暂无解析结果</p>' +
+        '<p style="font-size: 0.9rem; margin-top: 0.5rem;">输入小说内容后点击"开始解析"</p>' +
+        '</div>'
+      : '<dl class="meta-list">' +
+        "<div><dt>章节数</dt><dd>" +
+        formatNumber(parseMeta.chapter_count) +
+        "</dd></div>" +
+        "<div><dt>总字数</dt><dd>" +
+        formatNumber(parseMeta.total_characters) +
+        "</dd></div>" +
+        "<div><dt>最后更新</dt><dd>" +
+        formatDate(getTask("source_parse").updated_at) +
+        "</dd></div>" +
+        "</dl>" +
+        '<article class="task-inline">' +
+        "<strong>" +
+        escapeHtml(getTask("source_parse").message) +
+        "</strong>" +
+        '<div class="progress-bar compact"><span style="width:' +
+        Math.max(getTask("source_parse").progress, 5) +
+        '%;"></span></div>' +
+        "<small>解析时间：" +
+        formatDate(getTask("source_parse").updated_at) +
+        "</small>" +
+        "</article>";
+
+    // 章节预览内容
+    const chaptersContent = !hasChapters
+      ? '<div class="empty-state" style="padding: var(--gap-lg); text-align: center; color: var(--color-text-subtle);">' +
+        '<p>暂无章节预览</p>' +
+        '<p style="font-size: 0.9rem; margin-top: 0.5rem;">解析完成后会在这里显示章节</p>' +
+        '</div>'
+      : '<div class="chapter-grid">' +
+        state.data.source.chapters
+          .map((chapter) => {
+            return (
+              '<article class="chapter-card">' +
+              "<span>Chapter " +
+              chapter.index +
+              "</span>" +
+              "<h4>" +
+              escapeHtml(chapter.title) +
+              "</h4>" +
+              "<p>" +
+              escapeHtml(chapter.summary || "暂无摘要。") +
+              "</p>" +
+              "<small>" +
+              formatNumber(chapter.word_count) +
+              " 字</small>" +
+              "</article>"
+            );
+          })
+          .join("") +
+        "</div>";
 
     return (
       '<div class="upload-grid">' +
       '<section class="panel upload-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Upload View</p><h3>小说上传与解析</h3></div>' +
-      '<button class="primary-button" data-action="choose-file" type="button">选择 TXT / DOCX</button></div>' +
+      '<div class="panel-head">' +
+      '<div><p class="panel-kicker">小说输入</p><h3>原始小说</h3></div>' +
+      '<div class="panel-actions">' +
+      '<button class="ghost-button" data-action="load-sample" type="button">载入示例</button>' +
+      '<button class="primary-button" data-action="parse-text" type="button">开始解析</button>' +
+      '</div>' +
+      '</div>' +
+      
+      '<div class="text-input-section">' +
+      '<div class="input-row">' +
+      '<div class="input-group">' +
+      '<label>标题</label>' +
+      '<input type="text" id="novelTitle" placeholder="请输入小说标题" value="' + escapeHtml(state.data.project.title) + '" />' +
+      '</div>' +
+      '<div class="input-group">' +
+      '<label>作者</label>' +
+      '<input type="text" id="novelAuthor" placeholder="请输入作者名" />' +
+      '</div>' +
+      '</div>' +
+      '<div class="input-group">' +
+      '<label>类型</label>' +
+      '<select id="novelGenre">' +
+      '<option value="Drama">Drama</option>' +
+      '<option value="Action">Action</option>' +
+      '<option value="Romance">Romance</option>' +
+      '<option value="Comedy">Comedy</option>' +
+      '<option value="Thriller">Thriller</option>' +
+      '<option value="Fantasy">Fantasy</option>' +
+      '<option value="Sci-Fi">Sci-Fi</option>' +
+      '<option value="Horror">Horror</option>' +
+      '</select>' +
+      '</div>' +
+      '<div class="input-group">' +
+      '<div class="input-label-row">' +
+      '<label>小说正文（≥ 3 章，建议以 "第X章" 或 "Chapter X" 分隔）</label>' +
+      '<span class="word-count" id="wordCount">0 字</span>' +
+      '</div>' +
+      '<textarea id="novelText" placeholder="请输入或粘贴小说内容..." rows="15"></textarea>' +
+      '</div>' +
+      '</div>' +
+      
       '<div class="upload-zone" id="uploadZone">' +
       '<input class="visually-hidden" id="fileInput" type="file" accept=".txt,.docx" />' +
-      '<div class="upload-ornament">TXT<br />DOCX</div>' +
-      "<h4>拖入小说文件，或点击按钮选择</h4>" +
-      "<p>TXT 会尝试做前端章节拆分；DOCX 先走占位流程，后续接后端 Parser Service。</p>" +
-      '<div class="hero-tags">' +
-      '<span class="hero-tag">支持拖拽</span>' +
-      '<span class="hero-tag">章节摘要预览</span>' +
-      '<span class="hero-tag">自动标记下游 stale</span>' +
+      '<div class="upload-ornament">📄</div>' +
+      "<h4>或拖入文件上传</h4>" +
+      "<p>TXT 文件会自动拆分章节，DOCX 文件将做预处理。</p>" +
       "</div>" +
-      "</div>" +
-      '<div class="inline-note">' +
-      "<strong>当前文档：</strong>" +
-      escapeHtml(documentMeta.filename) +
-      " · " +
-      escapeHtml(documentMeta.file_type.toUpperCase()) +
-      "</div>" +
-      "</section>" +
+      
+      '</section>' +
+      
       '<section class="panel upload-meta-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Source Metadata</p><h3>解析概况</h3></div>' +
+      '<div class="panel-head"><div><p class="panel-kicker">解析概况</p><h3>解析结果</h3></div>' +
       '<span class="status-pill ' +
       statusTone(getTask("source_parse").status) +
       '">' +
       statusLabel(getTask("source_parse").status) +
       "</span></div>" +
-      '<dl class="meta-list">' +
-      "<div><dt>document.id</dt><dd>" +
-      escapeHtml(documentMeta.id) +
-      "</dd></div>" +
-      "<div><dt>file_type</dt><dd>" +
-      escapeHtml(documentMeta.file_type) +
-      "</dd></div>" +
-      "<div><dt>language</dt><dd>" +
-      escapeHtml(documentMeta.language || "未标记") +
-      "</dd></div>" +
-      "<div><dt>parser_version</dt><dd>" +
-      escapeHtml(parseMeta.parser_version) +
-      "</dd></div>" +
-      "<div><dt>chapter_count</dt><dd>" +
-      formatNumber(parseMeta.chapter_count) +
-      "</dd></div>" +
-      "<div><dt>total_characters</dt><dd>" +
-      formatNumber(parseMeta.total_characters) +
-      "</dd></div>" +
-      "</dl>" +
-      '<article class="task-inline">' +
-      "<strong>" +
-      escapeHtml(getTask("source_parse").message) +
-      "</strong>" +
-      '<div class="progress-bar compact"><span style="width:' +
-      Math.max(getTask("source_parse").progress, 5) +
-      '%;"></span></div>' +
-      "<small>最近更新：" +
-      formatDate(getTask("source_parse").updated_at) +
-      "</small>" +
-      "</article>" +
+      metaContent +
       "</section>" +
+      
       '<section class="panel chapters-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Chapter List</p><h3>章节预览</h3></div>' +
-      '<button class="ghost-button" data-nav="graph" type="button">转到图谱</button></div>' +
-      '<div class="chapter-grid">' +
-      state.data.source.chapters
-        .map((chapter) => {
-          return (
-            '<article class="chapter-card">' +
-            "<span>Chapter " +
-            chapter.index +
-            "</span>" +
-            "<h4>" +
-            escapeHtml(chapter.title) +
-            "</h4>" +
-            "<p>" +
-            escapeHtml(chapter.summary || "暂无摘要。") +
-            "</p>" +
-            "<small>" +
-            formatNumber(chapter.word_count) +
-            " 字</small>" +
-            "</article>"
-          );
-        })
-        .join("") +
-      "</div></section>" +
+      '<div class="panel-head"><div><p class="panel-kicker">章节列表</p><h3>章节预览</h3></div>' +
+      '<button class="ghost-button" data-nav="graph" type="button">生成图谱</button></div>' +
+      chaptersContent +
+      "</section>" +
       "</div>"
     );
   }
@@ -799,98 +1069,102 @@
         relationship.from_character_id === selectedCharacter.id ||
         relationship.to_character_id === selectedCharacter.id,
     );
+    const hasCharacters = state.data.characters && state.data.characters.length > 0;
 
-    return (
-      '<div class="graph-layout">' +
-      '<section class="panel graph-stage-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">Graph View</p><h3>人物关系图谱与故事图谱</h3></div>' +
-      '<div class="toolbar-inline">' +
-      '<button class="secondary-button" data-action="run-extraction" type="button">重新抽取</button>' +
-      '<button class="ghost-button" data-nav="script" type="button">去生成剧本</button>' +
-      "</div></div>" +
-      '<div class="graph-stage">' +
-      '<svg class="graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none">' +
-      state.data.relationships
-        .map((relationship) => {
-          const from = layout[relationship.from_character_id];
-          const to = layout[relationship.to_character_id];
-          if (!from || !to) {
-            return "";
-          }
+    // 图谱区域内容
+    const graphContent = !hasCharacters
+      ? '<div class="empty-state" style="padding: var(--gap-xl); text-align: center; color: var(--color-text-subtle);">' +
+        '<div style="font-size: 3rem; margin-bottom: 1rem;">🧩</div>' +
+        '<p>暂无人际关系图谱</p>' +
+        '<p style="font-size: 0.9rem; margin-top: 0.5rem;">解析小说后会自动抽取出人物关系</p>' +
+        '</div>'
+      : '<div class="graph-stage">' +
+        '<svg class="graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none">' +
+        state.data.relationships
+          .map((relationship) => {
+            const from = layout[relationship.from_character_id];
+            const to = layout[relationship.to_character_id];
+            if (!from || !to) {
+              return "";
+            }
 
-          return (
-            '<line x1="' +
-            from.x +
-            '" y1="' +
-            from.y +
-            '" x2="' +
-            to.x +
-            '" y2="' +
-            to.y +
-            '"></line>'
-          );
-        })
-        .join("") +
-      "</svg>" +
-      state.data.characters
-        .map((character) => {
-          const point = layout[character.id] || { x: 50, y: 50 };
-          return (
-            '<button class="graph-node ' +
-            (character.id === selectedCharacter.id ? "selected" : "") +
-            '" style="left:' +
-            point.x +
-            "%; top:" +
-            point.y +
-            '%;" data-character-id="' +
-            character.id +
-            '" type="button">' +
-            "<strong>" +
-            escapeHtml(character.name) +
-            "</strong>" +
-            "<small>" +
-            escapeHtml(character.identity || "未标注身份") +
-            "</small>" +
-            "</button>"
-          );
-        })
-        .join("") +
-      "</div>" +
-      '<div class="inline-note">' +
-      "<strong>当前模式：</strong>" +
-      escapeHtml(state.data.meta.graph_mode === "demo" ? "演示数据" : "前端模拟抽取") +
-      (state.data.meta.graph_stale ? " · 结果待刷新" : " · 结果已同步") +
-      "</div>" +
-      "</section>" +
-      '<section class="graph-side-column">' +
-      '<article class="panel character-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">人物关系图谱</p><h3>' +
-      escapeHtml(selectedCharacter.name) +
-      "</h3></div>" +
-      '<span class="status-pill info">' +
-      escapeHtml(selectedCharacter.identity || "未标注身份") +
-      "</span></div>" +
-      "<p>" +
-      escapeHtml(selectedCharacter.description || "暂无简介。") +
-      "</p>" +
-      '<dl class="meta-list compact">' +
-      "<div><dt>首次出现</dt><dd>" +
-      escapeHtml(selectedCharacter.first_appearance.chapter_id) +
-      "</dd></div>" +
-      "<div><dt>原文证据</dt><dd>" +
-      escapeHtml(selectedCharacter.first_appearance.excerpt) +
-      "</dd></div>" +
-      "</dl>" +
-      '<div class="relation-stack">' +
-      selectedRelationships
-        .map((relationship) => {
-          const targetId =
-            relationship.from_character_id === selectedCharacter.id
-              ? relationship.to_character_id
-              : relationship.from_character_id;
-          return (
-            '<article class="relation-chip">' +
-            "<strong>" +
+            return (
+              '<line x1="' +
+              from.x +
+              '" y1="' +
+              from.y +
+              '" x2="' +
+              to.x +
+              '" y2="' +
+              to.y +
+              '"></line>'
+            );
+          })
+          .join("") +
+        "</svg>" +
+        state.data.characters
+          .map((character) => {
+            const point = layout[character.id] || { x: 50, y: 50 };
+            return (
+              '<button class="graph-node ' +
+              (character.id === selectedCharacter.id ? "selected" : "") +
+              '" style="left:' +
+              point.x +
+              "%; top:" +
+              point.y +
+              '%;" data-character-id="' +
+              character.id +
+              '" type="button">' +
+              "<strong>" +
+              escapeHtml(character.name) +
+              "</strong>" +
+              "<small>" +
+              escapeHtml(character.identity || "未标注身份") +
+              "</small>" +
+              "</button>"
+            );
+          })
+          .join("") +
+        "</div>" +
+        '<div class="inline-note">' +
+        "<strong>当前模式：</strong>" +
+        escapeHtml(state.data.meta.graph_mode === "demo" ? "演示数据" : "前端模拟抽取") +
+        (state.data.meta.graph_stale ? " · 结果待刷新" : " · 结果已同步") +
+        "</div>";
+
+    // 人物详情内容
+    const characterDetailContent = !hasCharacters
+      ? '<div class="empty-state" style="padding: var(--gap-lg); text-align: center; color: var(--color-text-subtle);">' +
+        '<p>暂无角色信息</p>' +
+        '</div>'
+      : '<article class="panel character-panel">' +
+        '<div class="panel-head"><div><p class="panel-kicker">人物关系图谱</p><h3>' +
+        escapeHtml(selectedCharacter.name) +
+        "</h3></div>" +
+        '<span class="status-pill info">' +
+        escapeHtml(selectedCharacter.identity || "未标注身份") +
+        "</span></div>" +
+        "<p>" +
+        escapeHtml(selectedCharacter.description || "暂无简介。") +
+        "</p>" +
+        '<dl class="meta-list compact">' +
+        "<div><dt>首次出现</dt><dd>" +
+        escapeHtml(selectedCharacter.first_appearance.chapter_id) +
+        "</dd></div>" +
+        "<div><dt>原文证据</dt><dd>" +
+        escapeHtml(selectedCharacter.first_appearance.excerpt) +
+        "</dd></div>" +
+        "</dl>" +
+        '<div class="relation-stack">' +
+        selectedRelationships
+          .map((relationship) => {
+            const targetId =
+              relationship.from_character_id === selectedCharacter.id
+                ? relationship.to_character_id
+                : relationship.from_character_id;
+            return (
+              '<article class="relation-chip">' +
+              "<strong>" +
             escapeHtml(relationship.label) +
             "</strong>" +
             "<span>" +
@@ -902,43 +1176,82 @@
           );
         })
         .join("") +
-      "</div></article>" +
-      '<article class="panel timeline-panel">' +
-      '<div class="panel-head"><div><p class="panel-kicker">故事图谱</p><h3>事件时间线</h3></div>' +
-      '<span class="status-pill ' +
-      (state.data.meta.graph_stale ? "warning" : "success") +
-      '">' +
-      (state.data.meta.graph_stale ? "待刷新" : "已同步") +
-      "</span></div>" +
-      '<div class="timeline-list">' +
-      state.data.story_graph.events
-        .slice()
-        .sort((a, b) => a.timeline_order - b.timeline_order)
-        .map((event) => {
-          return (
-            '<article class="timeline-item">' +
-            "<span>0" +
-            event.timeline_order +
-            "</span>" +
-            "<div><strong>" +
-            escapeHtml(event.title) +
-            "</strong>" +
-            "<p>" +
-            escapeHtml(event.summary) +
-            "</p>" +
-            "<small>" +
-            escapeHtml(getCharacterName(event.participants[0])) +
-            " · " +
-            escapeHtml(event.time_label || "未标注时间") +
-            "</small></div></article>"
-          );
-        })
-        .join("") +
-      "</div></article></section></div>"
+      "</div></article>";
+
+    // 时间线内容
+    const hasEvents = state.data.story_graph && state.data.story_graph.events && state.data.story_graph.events.length > 0;
+    const timelineContent = !hasEvents
+      ? '<article class="panel timeline-panel">' +
+        '<div class="panel-head"><div><p class="panel-kicker">故事图谱</p><h3>事件时间线</h3></div>' +
+        '<span class="status-pill ' +
+        (state.data.meta.graph_stale ? "warning" : "success") +
+        '">' +
+        (state.data.meta.graph_stale ? "待刷新" : "已同步") +
+        "</span></div>" +
+        '<div class="empty-state" style="padding: var(--gap-lg); text-align: center; color: var(--color-text-subtle);">' +
+        '<p>暂无事件时间线</p>' +
+        '</div></article>'
+      : '<article class="panel timeline-panel">' +
+        '<div class="panel-head"><div><p class="panel-kicker">故事图谱</p><h3>事件时间线</h3></div>' +
+        '<span class="status-pill ' +
+        (state.data.meta.graph_stale ? "warning" : "success") +
+        '">' +
+        (state.data.meta.graph_stale ? "待刷新" : "已同步") +
+        "</span></div>" +
+        '<div class="timeline-list">' +
+        state.data.story_graph.events
+          .slice()
+          .sort((a, b) => a.timeline_order - b.timeline_order)
+          .map((event) => {
+            return (
+              '<article class="timeline-item">' +
+              "<span>0" +
+              event.timeline_order +
+              "</span>" +
+              "<div><strong>" +
+              escapeHtml(event.title) +
+              "</strong>" +
+              "<p>" +
+              escapeHtml(event.summary) +
+              "</p>" +
+              "<small>" +
+              escapeHtml(getCharacterName(event.participants[0])) +
+              " · " +
+              escapeHtml(event.time_label || "未标注时间") +
+              "</small></div></article>"
+            );
+          })
+          .join("") +
+        "</div></article>";
+
+    return (
+      '<div class="graph-layout">' +
+      '<section class="panel graph-stage-panel">' +
+      '<div class="panel-head"><div><p class="panel-kicker">Graph View</p><h3>人物关系图谱与故事图谱</h3></div>' +
+      '<div class="toolbar-inline">' +
+      '<button class="secondary-button" data-action="run-extraction" type="button">重新抽取</button>' +
+      '<button class="ghost-button" data-nav="script" type="button">去生成剧本</button>' +
+      "</div></div>" +
+      graphContent +
+      "</section>" +
+      '<section class="graph-side-column">' +
+      characterDetailContent +
+      timelineContent +
+      "</section></div>"
     );
   }
 
   function renderScriptSection() {
+    const hasScenes = state.data.script.scenes && state.data.script.scenes.length > 0;
+    
+    if (!hasScenes) {
+      return '<div class="empty-state" style="padding: var(--gap-xl); text-align: center; color: var(--color-text-subtle);">' +
+        '<div style="font-size: 3rem; margin-bottom: 1rem;">🎬</div>' +
+        '<p>暂无场次</p>' +
+        '<p style="font-size: 0.9rem; margin-top: 0.5rem;">解析小说后会自动生成，或手动添加场次</p>' +
+        '</div>';
+    }
+    
     const scene = getActiveScene();
     const sourceEvents = (scene.source_event_ids || []).map(getEventById).filter(Boolean);
 
@@ -1114,6 +1427,17 @@
   }
 
   function renderReviewSection() {
+    const hasIssues = state.data.review.issues && state.data.review.issues.length > 0;
+    const hasDimensions = state.data.quality.dimensions && state.data.quality.dimensions.length > 0;
+    
+    if (!hasIssues && !hasDimensions) {
+      return '<div class="empty-state" style="padding: var(--gap-xl); text-align: center; color: var(--color-text-subtle);">' +
+        '<div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>' +
+        '<p>暂无审校结果</p>' +
+        '<p style="font-size: 0.9rem; margin-top: 0.5rem;">先生成剧本，然后运行审校</p>' +
+        '</div>';
+    }
+    
     const issues = state.data.review.issues || [];
 
     return (
@@ -1197,6 +1521,16 @@
   }
 
   function renderStoryboardSection() {
+    const hasShots = state.data.storyboard.shots && state.data.storyboard.shots.length > 0;
+    
+    if (!hasShots) {
+      return '<div class="empty-state" style="padding: var(--gap-xl); text-align: center; color: var(--color-text-subtle);">' +
+        '<div style="font-size: 3rem; margin-bottom: 1rem;">🎞️</div>' +
+        '<p>暂无分镜</p>' +
+        '<p style="font-size: 0.9rem; margin-top: 0.5rem;">先生成剧本，然后生成分镜</p>' +
+        '</div>';
+    }
+    
     const filterSceneId = state.ui.storyboardFilter;
     const filteredShots =
       filterSceneId === "all"
@@ -1352,6 +1686,11 @@
     const renderer = renderers[state.ui.activeSection] || renderWorkspaceSection;
     container.innerHTML = renderer();
     bindSectionEvents();
+    
+    // 如果是 upload 页面，更新字数统计
+    if (state.ui.activeSection === "upload") {
+      updateWordCount();
+    }
   }
 
   function renderToasts() {
@@ -1365,13 +1704,37 @@
       .join("");
   }
 
+  function enterApp() {
+    console.log("enterApp called!");
+    state.hasEntered = true;
+    state.ui.activeSection = "upload"; // 直接进入 upload 页面
+    console.log("State updated, calling renderApp...");
+    renderApp();
+    console.log("renderApp completed!");
+  }
+
   function renderApp() {
-    ensureSelection();
-    renderNavigation();
-    renderSidebarProject();
-    renderHero();
-    renderSectionBody();
-    renderToasts();
+    console.log("renderApp called! state.hasEntered =", state.hasEntered);
+    const welcomePage = document.getElementById("welcomePage");
+    const appShell = document.getElementById("appShell");
+    console.log("welcomePage:", welcomePage);
+    console.log("appShell:", appShell);
+
+    if (state.hasEntered) {
+      console.log("Entering app mode...");
+      welcomePage.style.display = "none";
+      appShell.style.display = "grid";
+      ensureSelection();
+      renderNavigation();
+      renderSidebarProject();
+      renderHero();
+      renderSectionBody();
+      renderToasts();
+    } else {
+      console.log("Showing welcome page...");
+      welcomePage.style.display = "flex";
+      appShell.style.display = "none";
+    }
   }
 
   function chooseFileInput() {
@@ -1527,6 +1890,147 @@
     window.setTimeout(function () {
       applyUploadedSource(file, createPlaceholderChapters(file.name), "browser-docx-placeholder");
     }, 520);
+  }
+
+  function parseTextInput() {
+    const titleInput = document.getElementById("novelTitle");
+    const textInput = document.getElementById("novelText");
+    const title = titleInput ? titleInput.value.trim() : "未命名小说";
+    const text = textInput ? textInput.value.trim() : "";
+
+    if (!text) {
+      pushToast("请先输入小说内容！");
+      return;
+    }
+
+    const fakeFile = {
+      name: title + ".txt",
+      size: text.length,
+      lastModified: Date.now(),
+    };
+
+    updateTask("source_parse", "running", 30, "正在解析小说内容...");
+    addActivity("输入源文件", "开始解析用户输入的小说内容。");
+    renderApp();
+
+    window.setTimeout(function () {
+      const chapters = buildChaptersFromText(text);
+      applyUploadedSource(fakeFile, chapters, "browser-text-input-0.1");
+      state.data.project.title = title;
+      updateProjectTimestamp();
+      renderApp();
+    }, 300);
+  }
+
+  function updateWordCount() {
+    const textInput = document.getElementById("novelText");
+    const wordCountEl = document.getElementById("wordCount");
+    if (textInput && wordCountEl) {
+      const text = textInput.value;
+      // 统计中文字符和英文字母（不包括空格和换行）
+      const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+      const englishChars = (text.match(/[a-zA-Z]/g) || []).length;
+      const total = chineseChars + Math.ceil(englishChars / 5); // 英文按5个字母算一个字
+      wordCountEl.textContent = total + " 字";
+    }
+  }
+
+  function loadSample() {
+    const sampleText = `第一章 雨下的初遇
+
+暴雨如注，街道上行人稀少。林雨躲在咖啡店的屋檐下，看着豆大的雨点打在玻璃上，形成一道道水痕。
+
+"你也没带伞吗？"
+
+一个温和的声音从旁边传来。林雨转过头，看到一个穿着白色衬衫的年轻人，手里拿着一把黑色的伞，正微笑着看着她。
+
+"是啊，天气预报说今天不会下雨的。"林雨有些尴尬地笑了笑。
+
+"我叫陈阳，"年轻人伸出手，"不介意的话，我送你一程？"
+
+林雨犹豫了一下，然后点了点头，握住了那只温暖的手。
+
+第二章 老照片
+
+第二天清晨，雨停了。林雨在书桌上翻找东西时，不小心碰掉了一个旧相框。相框落在地上，玻璃碎了一地。
+
+她蹲下来捡碎片，却发现相框里夹着一张老照片。照片上是一个穿着校服的女孩，笑得很灿烂，旁边站着一个男孩，正是陈阳。
+
+"这是...陈阳？"林雨愣住了。
+
+照片的背面写着一行字："2018年6月7日，毕业快乐，陈阳。"
+
+林雨的心跳开始加速。2018年...那是她的毕业年份，可是她完全不记得陈阳这个人。
+
+第三章 重逢的咖啡馆
+
+下午，林雨来到昨天那家咖啡店。她刚推开门，就看到陈阳坐在靠窗的位置，手里拿着一本书，正在认真地阅读。
+
+阳光透过窗户洒在他的脸上，给他镀上了一层金色的光芒。林雨看着这一幕，心跳又开始加速。
+
+"林雨，你来了。"陈阳抬起头，看到她，脸上露出了微笑。
+
+"你...你怎么知道我叫林雨？"林雨有些紧张地问。
+
+陈阳放下书，指了指她放在桌上的照片："因为...我们早就认识了。"
+
+"什么意思？"林雨更加困惑了。
+
+"2018年6月7日，毕业典礼那天，"陈阳的声音变得温柔起来，"你忘了吗？那天，也是这样的雨天，我第一次遇到了你。"
+
+林雨看着陈阳的眼睛，突然觉得有些记忆的碎片开始在脑海中浮现...
+
+第四章 记忆的碎片
+
+"喝杯咖啡吧，慢慢想。"陈阳把一杯热咖啡推到林雨面前。
+
+林雨端起咖啡，温热的感觉从手心传到心里。她开始努力回想2018年的那场毕业典礼。
+
+"我...我好像有点印象了，"林雨皱着眉头，"那天是下着雨，我好像在礼堂门口遇到了一个人..."
+
+"对，那个人就是我，"陈阳微笑着说，"你当时把毕业帽掉在地上，我帮你捡了起来。"
+
+林雨闭上眼睛，一些模糊的画面开始变得清晰起来：她确实在那天掉了毕业帽，也确实有个男生帮她捡起来了。只是当时人太多，她没有看清那个男生的脸。
+
+"后来呢？"林雨问道。
+
+"后来...我向你表白了，但你拒绝了我，"陈阳的笑容有些苦涩，"你说你要专注于学业，不想谈恋爱。"
+
+林雨震惊地看着陈阳，她完全不记得这件事了。
+
+"对不起，我...我真的不记得了，"林雨道歉说。
+
+"没关系，"陈阳摇了摇头，"现在，我们又相遇了，不是吗？"
+
+第五章 新的开始
+
+从那天起，林雨和陈阳经常见面。他们一起喝咖啡，一起散步，一起谈论过去的事情。
+
+林雨渐渐发现，陈阳是一个很温柔、很体贴的人。他总是能注意到她的情绪变化，总是能在她需要帮助的时候出现。
+
+"林雨，"一天晚上，陈阳在送她回家的路上说，"我想再问你一次...这次，你愿意和我在一起吗？"
+
+林雨停下脚步，看着陈阳的眼睛。她看到了真诚，看到了期待，也看到了一丝紧张。
+
+"我...我愿意，"林雨微笑着说。
+
+陈阳愣住了，然后脸上露出了灿烂的笑容。他伸出手，紧紧握住了林雨的手。
+
+雨又开始下了，但这一次，他们不再是躲避在屋檐下的陌生人，而是携手共进的恋人。
+
+"真好，"林雨轻声说，"我们又相遇了。"
+
+"是啊，"陈阳笑着说，"这一次，我们不会再错过了。"
+
+两个身影在雨中渐行渐远，留下一串幸福的脚印...`;
+
+    const titleInput = document.getElementById("novelTitle");
+    const textInput = document.getElementById("novelText");
+    if (titleInput) titleInput.value = "暴雨夜";
+    if (textInput) textInput.value = sampleText;
+    
+    updateWordCount();
+    pushToast("示例小说已载入！");
   }
 
   function runExtraction() {
@@ -1921,6 +2425,12 @@
       case "choose-file":
         chooseFileInput();
         break;
+      case "parse-text":
+        parseTextInput();
+        break;
+      case "load-sample":
+        loadSample();
+        break;
       case "run-extraction":
         runExtraction();
         break;
@@ -1981,6 +2491,13 @@
     }
   });
 
+  document.addEventListener("input", function (event) {
+    const target = event.target;
+    if (target.id === "novelText") {
+      updateWordCount();
+    }
+  });
+
   document.addEventListener("dragover", function (event) {
     const uploadZone = event.target.closest("#uploadZone");
     if (!uploadZone) {
@@ -2024,5 +2541,31 @@
     pushToast("操作失败，请重试");
   });
 
-  renderApp();
+  // 欢迎页按钮事件 - 确保 DOM 加载完成后绑定
+  function bindEvents() {
+    console.log("Binding events...");
+    document.addEventListener("click", function (event) {
+      console.log("Document clicked, target:", event.target);
+      const target = event.target.closest("#enterBtn");
+      if (target) {
+        console.log("enterBtn clicked!");
+        enterApp();
+      }
+    });
+    console.log("Events bound!");
+  }
+
+  // 检查 DOM 是否加载完成
+  if (document.readyState === "loading") {
+    console.log("DOM still loading, waiting for DOMContentLoaded...");
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("DOMContentLoaded fired!");
+      bindEvents();
+      renderApp();
+    });
+  } else {
+    console.log("DOM already loaded, binding events immediately...");
+    bindEvents();
+    renderApp();
+  }
 })();

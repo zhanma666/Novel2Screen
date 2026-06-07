@@ -455,6 +455,70 @@
     return project;
   }
 
+  function createEmptyProject() {
+    return {
+      schema_version: "1.0",
+      project: {
+        id: "project_001",
+        title: "新项目",
+        description: "一个新的小说影视化改编项目。",
+        creator: "user",
+        created_at: nowIso(),
+        updated_at: nowIso(),
+        status: "editing",
+      },
+      source: {
+        document: null,
+        parse_result: null,
+        chapters: [],
+      },
+      characters: [],
+      relationships: [],
+      story_graph: {
+        events: [],
+        locations: [],
+        timeline: [],
+      },
+      script: {
+        id: "script_001",
+        title: "新项目",
+        style: "film",
+        version: "v1",
+        logline: "",
+        source_event_ids: [],
+        scenes: [],
+      },
+      storyboard: { shots: [] },
+      review: {
+        reviewed_at: null,
+        model: null,
+        issues: [],
+      },
+      quality: {
+        total_score: 0,
+        dimensions: [],
+      },
+      export: {
+        exported_at: null,
+        exporter_version: null,
+        validated: false,
+        validation_errors: [],
+      },
+      extensions: {},
+      meta: {
+        graph_stale: false,
+        review_stale: false,
+        quality_stale: false,
+        storyboard_stale: false,
+        export_stale: false,
+        graph_mode: "edit",
+        layout: {},
+      },
+      tasks: [],
+      activity_log: [],
+    };
+  }
+
   function nextVersion(previousVersion) {
     const match = String(previousVersion || "v0").match(/(\d+)/);
     const nextNumber = match ? Number(match[1]) + 1 : 1;
@@ -834,11 +898,12 @@
     };
   }
 
-  window.Novel2ScreenData = {
+  window.ScenecraftData = {
     styleLibrary: styleLibrary,
     deepClone: deepClone,
     nowIso: nowIso,
     createDemoProject: createDemoProject,
+    createEmptyProject: createEmptyProject,
     buildScriptFromStoryGraph: buildScriptFromStoryGraph,
     buildStoryboardFromScript: buildStoryboardFromScript,
     buildReviewFromScript: buildReviewFromScript,
